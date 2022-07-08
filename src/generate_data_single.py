@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
 
     Tc_guess = None
-    Tc_guess = 3.64   # good guess for the 3D Ising model; uncomment this to get
+    Tc_guess = 4.5   # good guess for the 3D Ising model; uncomment this to get
     if Tc_guess is None:
         N_measure = 1000  # just a quick guess
         output_filename = 'data_ising_square_L=%d.pkl' % L
