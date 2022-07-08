@@ -1,6 +1,7 @@
 import numpy as np
 
 import generate_data as gd
+import storage
 import sys
 
 import log
@@ -23,9 +24,8 @@ if __name__ == "__main__":
     log.debug("Simulating temperatures from %d/%d to %d/%d" % (a, b, a+1, b))
 
 
-    #Tc_guess = None
-    Tc_guess = 3.64   # good guess for the 2D Ising model; uncomment this to get
-    #                    # many T-points around this value for large L (-> long runtime!)
+    Tc_guess = None
+    Tc_guess = 3.64   # good guess for the 3D Ising model; uncomment this to get
     if Tc_guess is None:
         N_measure = 1000  # just a quick guess
         output_filename = 'data_ising_square_L=%d.pkl' % L

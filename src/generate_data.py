@@ -2,9 +2,10 @@ import numpy as np
 import time
 # from tqdm import tqdm
 
+from tqdm import tqdm
 import swendsen_wang as sw
 
-import pickle  # for input/output
+import storage
 
 
 def simulation(spins, bonds, T, N_measure=100):
@@ -13,7 +14,7 @@ def simulation(spins, bonds, T, N_measure=100):
     Es = []
     Ms = []
     for n in range(N_measure):
-        sw.swendsen_wang_update(spins, bonds, T)
+        spins = sw.swendsen_wang_update(spins, bonds, T)
         Es.append(sw.energy(spins, bonds))
         Ms.append(sw.magnetization(spins))
     return np.array(Es), np.array(Ms)
@@ -29,7 +30,7 @@ def gen_data_L(Ts, L, N_measure=10000, N_bins=10):
     data = dict((key, []) for key in obs)
     t0 = time.time()
     # for T in tqdm(Ts):
-    for T in Ts:
+    for T in tqdm(Ts):
         if N_measure > 1000:
             print("simulating L={L: 3d}, T={T:.3f}".format(L=L, T=T), flush=True)
         # thermalize. Rule of thumb: spent ~10-20% of the simulation time without measurement
@@ -60,22 +61,10 @@ def gen_data_L(Ts, L, N_measure=10000, N_bins=10):
     return data
 
 
-def save_data(filename, data, folder="data"):
-    """Save an (almost) arbitrary python object to disc."""
-    with open(folder+"/"+filename, 'wb') as f:
-        pickle.dump(data, f)
-    # done
-
-
-def load_data(filename, folder="data"):
-    """Load and return data saved to disc with the function `save_data`."""
-    with open(folder+"/"+filename, 'rb') as f:
-        data = pickle.load(f)
-    return data
 
 
 if __name__ == "__main__":
-    #Tc_guess = None
+    Tc_guess = None
     Tc_guess = 3.64   # good guess for the 2D Ising model; uncomment this to get
     #                    # many T-points around this value for large L (-> long runtime!)
     if Tc_guess is None:
@@ -98,7 +87,7 @@ if __name__ == "__main__":
             Ts = np.sort(Ts)[::-1]
         data[L] = gen_data_L(Ts, L, N_measure)
     data['Ls'] = Ls
-    save_data(output_filename, data)
+    storage.save_data(output_filename, data)
     # data structure:
     #  data = {'Ls': [8, 16, ...],
     #          8: {'observables': ['E', 'M', 'C', ...],

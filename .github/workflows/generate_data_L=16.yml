@@ -1,4 +1,4 @@
-name: Create Data L=64
+name: Create Data L=16
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    if: ${{ (contains(github.event.head_commit.message, 'calc') || contains(github.event.head_commit.message, 'run')) && contains(github.event.head_commit.message, '64') }}
+    if: ${{ (contains(github.event.head_commit.message, 'calc') || contains(github.event.head_commit.message, 'run')) && contains(github.event.head_commit.message, '16') }}
     strategy:
       matrix:
         python-version: [3.8]
@@ -27,7 +27,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Generating data
         run: |
-          python3 src/generate_data_single.py 64 14 25
+          python3 src/generate_data_single.py 16 0 1
 
 
       - name: Commit files
@@ -40,7 +40,7 @@ jobs:
           if [-z "$(git status --porcelain)"]; then
             echo "::set-output name=push::false"
           else
-            git commit -m "Add data for L=64 from automation" -a
+            git commit -m "Add data for L=16 from automation" -a
             echo "::set-output name=push::true"
           fi
         shell: bash
