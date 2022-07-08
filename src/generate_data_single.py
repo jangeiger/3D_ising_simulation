@@ -28,10 +28,10 @@ if __name__ == "__main__":
     Tc_guess = 4.5   # good guess for the 3D Ising model; uncomment this to get
     if Tc_guess is None:
         N_measure = 1000  # just a quick guess
-        output_filename = 'data_ising_square_L=%d.pkl' % L
+        output_filename = 'data_ising_square_L=%d_%d_of_%d.pkl' % (L, a, b)
     else:
         N_measure = 50000
-        output_filename = 'data_ising_square_largeL_L=%d.pkl' % L
+        output_filename = 'data_ising_square_largeL_L=%d_%d_of_%d.pkl' % (L, a, b)
 
     data = dict()
     if Tc_guess is None:
@@ -49,4 +49,4 @@ if __name__ == "__main__":
 
     data[L] = gd.gen_data_L(Ts, L, N_measure)
     data['Ls'] = L
-    gd.save_data(output_filename+("%d_%d" % (a, b)), data)
+    storage.save_data(output_filename, data)
