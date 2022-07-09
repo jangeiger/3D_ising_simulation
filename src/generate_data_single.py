@@ -30,7 +30,7 @@ if __name__ == "__main__":
         N_measure = 1000  # just a quick guess
         output_filename = 'data_ising_square_L=%d_%d_of_%d.pkl' % (L, a, b)
     else:
-        N_measure = 50000
+        N_measure = 100000
         output_filename = 'data_ising_square_largeL_L=%d_%d_of_%d.pkl' % (L, a, b)
 
     data = dict()

@@ -3,43 +3,47 @@ import numpy as np
 import scipy
 import scipy.sparse as sparse
 
-from numba import jit
-
 
 def xyz_2_idx(x, y, z, Lx, Ly, Lz):
+    """
+    Mapping of a 3 dimensional coordinate to a single index
+    """
     return z*Lx*Ly + y*Lx + x
 
 def idx_2_xyz(idx, Lx, Ly, Lz):
-    # assert idx < Lx*Ly*Lz, "Conversion from id to x,y,z wasn't possible, since the id was too big!"
-    # x, y, z = idx%Ly, (idx%(Lx*Ly))//Ly, idx//(Lx*Ly)
-    # assert 0 <= x < Lx, "Wrong x! (x:%d, Lx:%d)" % (x, Lx)
-    # assert 0 <= y < Ly, "Wrong y! (y:%d, Ly:%d)" % (y, Ly)
-    # assert 0 <= z < Lz, "Wrong z! (z:%d, Lz:%d)" % (z, Lz)
-    return idx%Ly, (idx%(Lx*Ly))//Ly, idx//(Lx*Ly)
+    """
+    Mapping of a single index to a 3 dimensional coordinate
+    """
+    assert idx < Lx*Ly*Lz, "Conversion from id to x,y,z wasn't possible, since the id was too big!"
+    x, y, z = idx%Ly, (idx%(Lx*Ly))//Ly, idx//(Lx*Ly)
+    assert 0 <= x < Lx, "Wrong x! (x:%d, Lx:%d)" % (x, Lx)
+    assert 0 <= y < Ly, "Wrong y! (y:%d, Ly:%d)" % (y, Ly)
+    assert 0 <= z < Lz, "Wrong z! (z:%d, Lz:%d)" % (z, Lz)
+    return x, y, z
 
 def get_bond_indices(Lx, Ly, Lz):
+    """
+    create bonds for cubic lattice
+    """
     N = Lx * Ly * Lz
-    ver_bond_list = []
-    hor_bond_list = []
+    bond_list = []
     for idx in range(N):
         x, y, z = idx_2_xyz(idx, Lx, Ly, Lz)
         hor_idx = xyz_2_idx((x+1)%Lx, y, z, Lx, Ly, Lz)
         ver_idx = xyz_2_idx(x, (y+1)%Ly, z, Lx, Ly, Lz)
         dep_idx = xyz_2_idx(x, y, (z+1)%Lz, Lx, Ly, Lz)
-        hor_bond_list.append([idx, hor_idx])
-        ver_bond_list.append([idx, ver_idx])
-        ver_bond_list.append([idx, dep_idx])
+        bond_list.append([idx, hor_idx])
+        bond_list.append([idx, ver_idx])
+        bond_list.append([idx, dep_idx])
 
-
-    bond_list = hor_bond_list + ver_bond_list
-    bond_indices = np.array(bond_list)
-    return bond_indices
-
-
+    return np.array(bond_list)
 
 
 
 def init_system(Lx, Ly, Lz):
+    """
+    Initialize 3D Ising lattice with random spins on every site
+    """
     N = Lx * Ly * Lz
     spin_config = np.random.choice([-1,1], N)
     bond_indices = get_bond_indices(Lx, Ly, Lz)
@@ -52,25 +56,16 @@ def get_bond_config(spin_config, bond_indices, T):
     '''
     get the bond_config wb for each of the bonds
     '''
-    beta = 1./T
+    beta = 1/T
     N = np.size(spin_config)
 
     ZZ = spin_config[bond_indices[:,0]] * spin_config[bond_indices[:,1]]
     bond_config = np.zeros([3*N])
-    rand_array = np.array(np.random.rand(3*N) > np.exp(-2.*beta)).astype(int)
+    rand_array = np.array(np.random.rand(3*N) > np.exp(-2*beta)).astype(int)
     bond_config[ZZ == 1] = rand_array[ZZ == 1]
     return bond_config
 
 
-
-
-@jit(nopython=True)
-def flip_spin_config(spin_config, N_components, labels):
-    flip_cluster = np.random.random(N_components) < 0.5   # N_components True/False values with 50/50 chance
-    for n in range(len(spin_config)):
-        cluster = labels[n]
-        if flip_cluster[cluster]:
-            spin_config[n] = - spin_config[n]
 
 
 def swendsen_wang_update(spin_config, bond_indices, T):
@@ -78,7 +73,7 @@ def swendsen_wang_update(spin_config, bond_indices, T):
     Perform one update of the Swendsen-Wang algorithm
     """
     N = np.size(spin_config)
-    bond_config = get_bond_config(spin_config, bond_indices, T=T)
+    bond_config = get_bond_config(spin_config, bond_indices, T)
     graph = sparse.csr_matrix((bond_config, (bond_indices[:, 0], bond_indices[:, 1])), shape=(N, N))
     graph = graph + graph.T
     n_components, labels = scipy.sparse.csgraph.connected_components(graph)
@@ -91,9 +86,6 @@ def swendsen_wang_update(spin_config, bond_indices, T):
 
 
 
-
-
-
 """
 measurements
 """
@@ -101,7 +93,7 @@ measurements
 
 def energy(spin_config, bond_indices):
     """returns energy of entire system"""
-    return -1. * np.sum(spin_config[bond_indices[:, 0]] * spin_config[bond_indices[:, 1]])
+    return -np.sum(spin_config[bond_indices[:, 0]] * spin_config[bond_indices[:, 1]])
 
 
 def magnetization(spin_config):
