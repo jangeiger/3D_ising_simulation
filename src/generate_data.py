@@ -34,7 +34,7 @@ def gen_data_L(Ts, L, N_measure=10000, N_bins=10):
         if N_measure > 1000:
             print("simulating L={L: 3d}, T={T:.3f}".format(L=L, T=T), flush=True)
         # thermalize. Rule of thumb: spent ~10-20% of the simulation time without measurement
-        simulation(spins, bonds, T, N_measure//8)
+        simulation(spins, bonds, T, N_measure//4)
         # Simulate with measurements
         bins = dict((key, []) for key in obs)
         for b in range(N_bins):

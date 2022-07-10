@@ -27,7 +27,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Generating data
         run: |
-          python3 src/generate_data_single.py 16 0 1
+          python3 src/generate_data_single.py 16 0 2
 
 
       - name: Commit files
