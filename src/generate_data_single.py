@@ -23,7 +23,6 @@ if __name__ == "__main__":
     assert a < b
     log.debug("Simulating temperatures from %d/%d to %d/%d" % (a, b, a+1, b))
 
-
     Tc_guess = None
     Tc_guess = 4.5   # good guess for the 3D Ising model; uncomment this to get
     if Tc_guess is None:
@@ -44,7 +43,7 @@ if __name__ == "__main__":
         Ts = np.sort(Ts)[::-1]
 
     # cut temperatures
-    Ts = Ts[int(a/b * len(Ts)):int((a+1)/b * len(Ts))]
+    Ts = Ts[round(a/b * len(Ts)):round((a+1)/b * len(Ts))]
     log.debug(Ts)
 
     data[L] = gd.gen_data_L(Ts, L, N_measure)
